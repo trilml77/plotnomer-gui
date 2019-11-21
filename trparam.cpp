@@ -53,7 +53,10 @@ void trParam::comParamRW(bool write)
             "portFlowControl",
             "portLocalEcho",
             "timerTime",
-            "timerStart"
+            "timerStart",
+            "nportConnection",
+            "nportIPAddres",
+            "nportPort"
         };
 
     const QStringList portVl =
@@ -66,7 +69,10 @@ void trParam::comParamRW(bool write)
             "None",
             "True",
             "10",
-            "False"
+            "False",
+            "False",
+            "192.168.3.244",
+            "4041"
         };
 
     for (int ii=0;ii < portPr.count();ii++)

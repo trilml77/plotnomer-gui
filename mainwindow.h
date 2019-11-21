@@ -10,6 +10,7 @@
 #include <QtCore/QtGlobal>
 #include <QMainWindow>
 #include <QtSerialPort/QSerialPort>
+#include <QTcpSocket>
 #include <QSystemTrayIcon>
 #include <QtCharts/QChartView>
 #include <QtCharts/QValueAxis>
@@ -48,11 +49,19 @@ public:
 private slots:
     void about();
 
+    //определим слоты для обработки сигналов сериал порта
     void openSerialPort();
     void closeSerialPort();
+    void handleError(QSerialPort::SerialPortError error);
+
+    //определим слоты для обработки сигналов сокета
+    void onSokConnected();
+    void onSokDisconnected();
+    void onSokDisplayError(QAbstractSocket::SocketError socketError);
+
     void writeData(const QByteArray &data);
     void readData();
-    void handleError(QSerialPort::SerialPortError error);
+
     void tmSerialRun();
     void timerSet();
 
@@ -89,6 +98,7 @@ private:
     SettingsDialog *settings;
     arhivdialog *arhdialog;
     QSerialPort *serial;
+    QTcpSocket *tcpsok;
     QSplitter *splitter;
     QChart  *chrt;
     QChartView *chartView;

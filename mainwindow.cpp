@@ -16,6 +16,7 @@
 #include <QtSerialPort/QSerialPort>
 #include <QFileDialog>
 #include <QLocale>
+#include <qnetworkproxy.h>
 
 #define MaxSize 16777215
 
@@ -55,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
     txt.clear();
 
     serial = new QSerialPort(this);
+    tcpsok = new QTcpSocket(this);
     settings = new SettingsDialog;
 
     ui->actionConnect->setEnabled(true);
@@ -72,6 +74,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(serial, &QSerialPort::readyRead, this, &MainWindow::readData);
     connect(console, &Console::getData, this, &MainWindow::writeData);
+
+    tcpsok->setProxy(QNetworkProxy::NoProxy);
+    connect(tcpsok, SIGNAL(readyRead()), this, SLOT(readData()));
+    connect(tcpsok, SIGNAL(connected()), this, SLOT(onSokConnected()));
+    connect(tcpsok, SIGNAL(disconnected()), this, SLOT(onSokDisconnected()));
+    connect(tcpsok, SIGNAL(error(QAbstractSocket::SocketError)),this, SLOT(onSokDisplayError(QAbstractSocket::SocketError)));
+
 
     connect(&tmSerial,  SIGNAL(timeout()), this, SLOT(tmSerialRun()));
     tmSerial.setInterval(1000);
@@ -155,6 +164,7 @@ void MainWindow::writeData(const QByteArray &data)
 void MainWindow::readData()
 {
     serialRead = QDateTime::currentDateTime();
+
     QByteArray data = serial->readAll();
     console->putData(data);
 
@@ -239,6 +249,41 @@ void MainWindow::snAbort()
         clearLabel();
     }
 }
+
+void MainWindow::onSokConnected()
+{
+    SettingsDialog::Settings p = settings->settings();
+    showStatusMessage(tr("Connected to %1 : %2").arg(p.nportIPAddres).arg(p.nportPort));
+}
+
+void MainWindow::onSokDisconnected()
+{
+    SettingsDialog::Settings p = settings->settings();
+    showStatusMessage(tr("DisConnected from %1").arg(p.nportIPAddres));
+}
+
+void MainWindow::onSokDisplayError(QAbstractSocket::SocketError socketError)
+{
+    SettingsDialog::Settings p = settings->settings();
+    QString hostport = tr("%1 : %2").arg(p.nportIPAddres).arg(p.nportPort);
+
+    switch(socketError)
+    {
+    case QAbstractSocket::HostNotFoundError:
+        QMessageBox::critical(this,"Connection : The host was not found. %s",qUtf8Printable(hostport)); break;
+    case QAbstractSocket::RemoteHostClosedError:
+        QMessageBox::warning(this,"Connection : The remote host is closed. %s",qUtf8Printable(hostport)); break;
+    case QAbstractSocket::ConnectionRefusedError:
+        QMessageBox::warning(this,"Connection : The connection was refused. %s",qUtf8Printable(hostport)); break;
+    case QAbstractSocket::SocketTimeoutError:
+        QMessageBox::warning(this,"Connection : The connection timeout. %s",qUtf8Printable(hostport));
+        tcpsok->close();
+        break;
+    default:
+        QMessageBox::critical(this,"Connection : %s",qUtf8Printable(QString(tcpsok->errorString())+" : "+hostport)); break;
+    }
+}
+
 
 void MainWindow::handleError(QSerialPort::SerialPortError error)
 {

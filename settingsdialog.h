@@ -42,6 +42,10 @@ public:
         bool localEchoEnabled;
         bool timerEnabled;
         int timerTime;
+
+        bool nportConnection;
+        QString nportIPAddres;
+        int nportPort;
     };
 
     explicit SettingsDialog(QWidget *parent = nullptr);

@@ -139,11 +139,17 @@ void SettingsDialog::fillPortsParameters()
     bool chk = trPrm.getParam("portLocalEcho") == "True";
     ui->localEchoCheckBox->setChecked(chk);
 
-    int spt = trPrm.getParam("timerTime").toInt();
-    ui->spTimer->setValue(spt);
+    ui->spTimer->setValue(trPrm.getParam("timerTime").toInt());
 
     bool cht = trPrm.getParam("timerStart") == "True";
     ui->chTimer->setChecked(cht);
+
+    bool chNc = trPrm.getParam("nportConnection") == "True";
+    ui->nportCheckBox->setChecked(chNc);
+
+    ui->nportIPAddres->setText(trPrm.getParam("nportIPAddres"));
+    ui->nportPort->setValue(trPrm.getParam("nportPort").toInt());
+
 }
 
 void SettingsDialog::fillPortsInfo()
@@ -218,6 +224,10 @@ void SettingsDialog::updateSettings()
     trPrm.setParam("portLocalEcho",ui->localEchoCheckBox->isChecked() ? "True" : "False");
     trPrm.setParam("timerTime",QString::number(ui->spTimer->value()));
     trPrm.setParam("timerStart",ui->chTimer->isChecked() ? "True" : "False");
+
+    trPrm.setParam("nportConnection",ui->nportCheckBox->isChecked() ? "True" : "False");
+    trPrm.setParam("nportIPAddres",ui->nportIPAddres->text());
+    trPrm.setParam("nportPort",QString::number(ui->nportPort->value()));
 
     trPrm.comParamRW(true);
 }
