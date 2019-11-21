@@ -50,8 +50,9 @@ private slots:
     void about();
 
     //определим слоты для обработки сигналов сериал порта
-    void openSerialPort();
-    void closeSerialPort();
+    void actConnect();
+    void actDisconnect();
+
     void handleError(QSerialPort::SerialPortError error);
 
     //определим слоты для обработки сигналов сокета
@@ -83,6 +84,13 @@ private slots:
 
 private:
     void initActionsConnections();
+
+    void openSerialPort();
+    void closeSerialPort();
+
+    void openSocket();
+    void closeSocket();
+
     void setChart(QChart *ch);
     void iniSeries();
     void appSeries(QMap<QString,QString> zn);

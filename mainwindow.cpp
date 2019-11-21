@@ -108,6 +108,31 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::actConnect()
+{
+    SettingsDialog::Settings p = settings->settings();
+    if (!p.nportConnection)
+      openSerialPort();
+    else
+      openSocket();
+}
+
+void MainWindow::actDisconnect()
+{
+    SettingsDialog::Settings p = settings->settings();
+    if (!p.nportConnection)
+      closeSerialPort();
+    else
+      closeSocket();
+
+    console->setEnabled(false);
+    ui->actionConnect->setEnabled(true);
+    ui->actionDisconnect->setEnabled(false);
+    ui->actionConfigure->setEnabled(true);
+
+    showStatusMessage(tr("Disconnected"));
+}
+
 
 void MainWindow::openSerialPort()
 {
@@ -119,34 +144,54 @@ void MainWindow::openSerialPort()
     serial->setStopBits(p.stopBits);
     serial->setFlowControl(p.flowControl);
     if (serial->open(QIODevice::ReadWrite)) {
+
         console->setEnabled(true);
         console->setLocalEchoEnabled(p.localEchoEnabled);
+
+        showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")
+                          .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
+                          .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl));
 
         ui->actionConnect->setEnabled(false);
         ui->actionDisconnect->setEnabled(true);
         ui->actionConfigure->setEnabled(false);
 
-        showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")
-                          .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
-                          .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl));
     } else {
         QMessageBox::critical(this, tr("Error"), serial->errorString());
-
         showStatusMessage(tr("Open error"));
     }
 }
 
 void MainWindow::closeSerialPort()
 {
-    if (serial->isOpen())
-        serial->close();
-    console->setEnabled(false);
+    if (serial->isOpen()) serial->close();
+}
 
-    ui->actionConnect->setEnabled(true);
-    ui->actionDisconnect->setEnabled(false);
-    ui->actionConfigure->setEnabled(true);
+void MainWindow::openSocket()
+{
+    if (tcpsok->state() == QAbstractSocket::UnconnectedState)
+    {
+        SettingsDialog::Settings p = settings->settings();
+        tcpsok->connectToHost(p.nportIPAddres,quint16(p.nportPort));
+        if (tcpsok->waitForConnected(5000))
+        {
+            console->setEnabled(true);
+            console->setLocalEchoEnabled(p.localEchoEnabled);
+            ui->actionConnect->setEnabled(false);
+            ui->actionDisconnect->setEnabled(true);
+            ui->actionConfigure->setEnabled(false);
+        }
+        else
+        {
+            QMessageBox::critical(this, tr("Error"), tcpsok->errorString());
+            showStatusMessage(tr("Connect error"));
+        }
+    }
+}
 
-    showStatusMessage(tr("Disconnected"));
+void MainWindow::closeSocket()
+{
+    if(tcpsok->isOpen()) tcpsok->close();
 }
 
 void MainWindow::about()
@@ -158,14 +203,25 @@ void MainWindow::about()
 
 void MainWindow::writeData(const QByteArray &data)
 {
-    serial->write(data);
+    SettingsDialog::Settings p = settings->settings();
+    if(!p.nportConnection)
+      serial->write(data);
+    else
+      tcpsok->write(data);
 }
 
 void MainWindow::readData()
 {
     serialRead = QDateTime::currentDateTime();
 
-    QByteArray data = serial->readAll();
+    QByteArray data;
+
+    SettingsDialog::Settings p = settings->settings();
+    if(!p.nportConnection)
+      data = serial->readAll();
+    else
+      data = tcpsok->readAll();
+
     console->putData(data);
 
     txt.append(QString(data));
@@ -299,8 +355,8 @@ void MainWindow::initActionsConnections()
     connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::close);
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about);
 
-    connect(ui->actionConnect, &QAction::triggered, this, &MainWindow::openSerialPort);
-    connect(ui->actionDisconnect, &QAction::triggered, this, &MainWindow::closeSerialPort);
+    connect(ui->actionConnect, &QAction::triggered, this, &MainWindow::actConnect);
+    connect(ui->actionDisconnect, &QAction::triggered, this, &MainWindow::actDisconnect);
     connect(ui->actionConfigure, &QAction::triggered, settings, &SettingsDialog::exec);
     connect(ui->actionClear, &QAction::triggered, this, &MainWindow::consoleClear);
     connect(ui->actionTerminal, &QAction::triggered, this, &MainWindow::consoleHidden);

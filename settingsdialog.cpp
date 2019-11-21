@@ -214,6 +214,10 @@ void SettingsDialog::updateSettings()
     currentSettings.timerEnabled = ui->chTimer->isChecked();
     currentSettings.timerTime = ui->spTimer->value();
 
+    currentSettings.nportConnection = ui->nportCheckBox->isChecked();
+    currentSettings.nportIPAddres = ui->nportIPAddres->text();
+    currentSettings.nportPort = ui->nportPort->value();
+
     trPrm.setParam("portName",ui->serialPortInfoListBox->currentText());
     trPrm.setParam("portBaudRate",ui->baudRateBox->currentText());
     trPrm.setParam("portDataBits",ui->dataBitsBox->currentText());
