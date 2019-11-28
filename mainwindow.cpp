@@ -428,7 +428,8 @@ void MainWindow::refreshDisplay(QMap<QString, QString> SerialZn)
     if(meteringOn)
     {
         if(SerialZn.value("View") == "On") iniSeries();
-        appSeries(SerialZn);
+        if(SerialZn.value("ps") != "")
+          if(SerialZn.value("ps").toInt() > 0) appSeries(SerialZn);
     }
 
     if(SerialZn.value("Err") != "")
@@ -508,10 +509,12 @@ void MainWindow::appSeries(QMap<QString,QString> zn)
 
         if (addX > maxTm && addY > 0) {
           maxTm = addX;
+
           if (addY > maxPd) maxPd = addY;
-          if (addY < minPd) minPd = addY;
-          if (maxPd-minPd < 0.5) maxPd = minPd + 0.2;
-          chrt->axisY()->setRange(minPd,maxPd);
+          if (addY < minPd) minPd = addY;          
+          if (maxPd < minPd) maxPd = minPd;
+
+          chrt->axisY()->setRange(minPd-0.1,maxPd+0.1);
           chrt->axisX()->setRange(0,maxTm);
           pdSeris->append(qreal(addX), qreal(addY));
         }

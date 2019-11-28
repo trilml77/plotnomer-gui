@@ -43,7 +43,7 @@
            <number>2</number>
           </property>
           <property name="text">
-           <string>Вакум</string>
+           <string>Ошибка</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -302,7 +302,7 @@
      <x>0</x>
      <y>0</y>
      <width>947</width>
-     <height>23</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuCalls">
