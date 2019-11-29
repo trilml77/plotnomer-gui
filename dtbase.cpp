@@ -218,7 +218,12 @@ void dtbase::querytbArhSl(int id, QTableWidget *tbRes, QLineSeries *pdSeris,Char
                 ii++;
             }
         }
-        if(mx->maxY-mx->minY < 0.5) mx->maxY = mx->minY + 0.2;
+
+        if(mx->maxY < mx->minY) mx->maxY = mx->minY;
+
+        mx->maxY = mx->maxY + 0.1;
+        mx->minY = mx->minY - 0.1;
+
         pbar->setValue(100);
     }
 }
