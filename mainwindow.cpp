@@ -205,9 +205,15 @@ void MainWindow::writeData(const QByteArray &data)
 {
     SettingsDialog::Settings p = settings->settings();
     if(!p.nportConnection)
+    {
       serial->write(data);
+      serial->flush();
+    }
     else
+    {
       tcpsok->write(data);
+      tcpsok->flush();
+    }
 }
 
 void MainWindow::readData()
@@ -439,10 +445,12 @@ void MainWindow::refreshDisplay(QMap<QString, QString> SerialZn)
         ui->lbMetering->setEnabled(false);
     }
 
-    QString zf = QString(SerialZn.value("dp"));
+    QString z_dp = QString(SerialZn.value("dp"));
+    QString z_dn = QString(SerialZn.value("dn"));
     QString zi = QString(SerialZn.value("vs"));
 
-    ui->lcdNumber->display(zf.toFloat());
+    ui->lcdNumber_dp->display(z_dp.toFloat());
+    ui->lcdNumber_dn->display(z_dn.toFloat());
     ui->lbSens->setEnabled(zi.toInt() != 0);
 
     if (SerialZn.value("tm") != "")
@@ -461,11 +469,14 @@ void MainWindow::refreshDisplay(QMap<QString, QString> SerialZn)
     {
 
         ui->tableResult->item(0,0)->setText(SerialZn.value("dh1"));
-        ui->tableResult->item(1,0)->setText(SerialZn.value("dl1"));
-        ui->tableResult->item(0,1)->setText(SerialZn.value("pr1"));
-        ui->tableResult->item(0,2)->setText(SerialZn.value("dh2"));
-        ui->tableResult->item(1,2)->setText(SerialZn.value("dl2"));
-        ui->tableResult->item(0,3)->setText(SerialZn.value("pr2"));
+        ui->tableResult->item(0,1)->setText(SerialZn.value("dl1"));
+        ui->tableResult->item(0,2)->setText(SerialZn.value("pr1"));
+
+        ui->tableResult->item(1,0)->setText(SerialZn.value("dh2"));
+        ui->tableResult->item(1,1)->setText(SerialZn.value("dl2"));
+        ui->tableResult->item(1,2)->setText(SerialZn.value("pr2"));
+
+        ui->tableResult->item(2,2)->setText(SerialZn.value("pr3"));
         ui->tableResult->resizeColumnsToContents();
     }
 }
@@ -522,19 +533,6 @@ void MainWindow::appSeries(QMap<QString,QString> zn)
 //      chartView->update();
 }
 
-void MainWindow::saveTable()
-{
-    QString fileName = QFileDialog::getSaveFileName(this,
-                          tr("Save table"), "plotnomer.html",
-                          tr("plotnomer.html (*.html);;All Files (*)"));
-    if (!fileName.isEmpty()){
-        QFile file(fileName);
-        file.open(QIODevice::WriteOnly | QIODevice::Text);
-        file.write(createHtml().toUtf8());
-        file.close();
-    }
-}
-
 void MainWindow::historyShow()
 {
    arhdialog->frRefresh();
@@ -551,9 +549,8 @@ void MainWindow::historySelect(int id)
    chartView->update();
 }
 
-QString MainWindow::createHtml()
+void SaveThread::run()
 {
-
     QString html  = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"><html>";
     html +="<head>";
     html +="<meta charset=\"UTF-8\">";
@@ -562,11 +559,11 @@ QString MainWindow::createHtml()
 
     html += "<table border=\"3\" cellspacing=\"0\" cellpadding=\"0\">";
 
-    for(int ii=0;ii<ui->tableResult->rowCount();ii++)
+    for(int ii=0;ii<tbrs->rowCount();ii++)
     {
         html +="<tr>";
-        for(int nn=0;nn<ui->tableResult->columnCount();nn++)
-            html +="<td>" + ui->tableResult->item(ii,nn)->text() + "</td>";
+        for(int nn=0;nn<tbrs->columnCount();nn++)
+            html +="<td>" + tbrs->item(ii,nn)->text().replace('.',',') + "</td>";
         html +="</tr>";
     }
 
@@ -579,16 +576,80 @@ QString MainWindow::createHtml()
     html += "<th align=\"center\" valign=\"center\">Y </th>";
     html += "</tr>";
 
-    for(int ii=0;ii<pdSeris->count();ii++)
+    for(int ii=0;ii<pdsr->count();ii++)
     {
         html +="<tr>";
-        html +="<td>" + QString::number(pdSeris->at(ii).x(),'g',3) + "</td>";
-        html +="<td>" + QString::number(pdSeris->at(ii).y(),'g',3) + "</td>";
+        html +="<td>" + QString::number(pdsr->at(ii).x(),'g',3).replace('.',',') + "</td>";
+        html +="<td>" + QString::number(pdsr->at(ii).y(),'g',3).replace('.',',') + "</td>";
         html +="</tr>";
     }
 
     html += "</table></body></html>";
 
+    QFile file(fileName);
+    file.open(QIODevice::WriteOnly | QIODevice::Text);
+    file.write(html.toUtf8());
+    file.close();
+}
+
+void MainWindow::saveTable()
+{
+    QString fileName = QFileDialog::getSaveFileName(this,
+                          tr("Save table"), "plotnomer.xls",
+                          tr("plotnomer.xls (*.xls);;All Files (*)"));
+    if (fileName.isEmpty()) return;
+
+    SaveThread *saveThread = new SaveThread;
+    connect(saveThread, &SaveThread::finished, saveThread, &QObject::deleteLater);
+    saveThread->fileName = fileName;
+    saveThread->tbrs = ui->tableResult;
+    saveThread->pdsr = pdSeris;
+    saveThread->start();
+}
+
+QString MainWindow::createHtml(QTableWidget* tbrs, QLineSeries* pdsr)
+{
+
+    QString html  = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"><html>";
+    html +="<head>";
+    html +="<meta charset=\"UTF-8\">";
+    html +="</head>";
+    html +="<body>";
+
+    html += "<table border=\"3\" cellspacing=\"0\" cellpadding=\"0\">";
+
+    for(int ii=0;ii<tbrs->rowCount();ii++)
+    {
+        html +="<tr>";
+        for(int nn=0;nn<tbrs->columnCount();nn++)
+            html +="<td>" + tbrs->item(ii,nn)->text() + "</td>";
+        html +="</tr>";
+    }
+
+    html +="</table>";
+
+
+    html += "<table border=\"3\" cellspacing=\"0\" cellpadding=\"0\">";
+    html += "<tr>";
+    html += "<th align=\"center\" valign=\"center\">X </th>";
+    html += "<th align=\"center\" valign=\"center\">Y </th>";
+    html += "</tr>";
+
+    for(int ii=0;ii<pdsr->count();ii++)
+    {
+        html +="<tr>";
+        html +="<td>" + QString::number(pdsr->at(ii).x(),'g',3) + "</td>";
+        html +="<td>" + QString::number(pdsr->at(ii).y(),'g',3) + "</td>";
+        html +="</tr>";
+    }
+
+    html += "</table></body></html>";
+/*
+    QFile file(fileName);
+    file.open(QIODevice::WriteOnly | QIODevice::Text);
+    file.write(createHtml(ui->tableResult,pdSeris).toUtf8());
+    file.close();
+*/
     return html;
 }
 

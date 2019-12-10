@@ -19,7 +19,8 @@
 #include <QTimer>
 #include <QSplitter>
 #include <QDateTime>
-
+#include <QTableWidget>
+#include <QThread>
 
 
 QT_BEGIN_NAMESPACE
@@ -96,8 +97,8 @@ private:
     void appSeries(QMap<QString,QString> zn);
     void showStatusMessage(const QString &message);
     void refreshDisplay(QMap<QString,QString> SerialZn);
-    QString createHtml();
     void clearLabel();
+    QString createHtml(QTableWidget* tbrs, QLineSeries* pdsr);
 
 private:
     Ui::MainWindow *ui;
@@ -126,6 +127,16 @@ private:
     dtbase *dtbs;
     QSystemTrayIcon *trayIcon;
 
+};
+
+class SaveThread : public QThread
+{
+    Q_OBJECT
+    void run() override;
+public:
+    QString fileName;
+    QTableWidget* tbrs;
+    QLineSeries* pdsr;
 };
 
 #endif // MAINWINDOW_H

@@ -121,12 +121,12 @@ void dtbase::pushtbArhiv(QTableWidget *tbRes, QLineSeries *pdSeris,QProgressBar 
             qr.bindValue(":dttm", QDateTime::currentDateTime());
 
             qr.bindValue(":dh1", tbRes->item(0,0)->text().toFloat());
-            qr.bindValue(":dl1", tbRes->item(1,0)->text().toFloat());
-            qr.bindValue(":pr1", tbRes->item(0,1)->text().toInt());
+            qr.bindValue(":dl1", tbRes->item(0,1)->text().toFloat());
+            qr.bindValue(":pr1", tbRes->item(0,2)->text().toInt());
 
-            qr.bindValue(":dh2", tbRes->item(0,2)->text().toFloat());
-            qr.bindValue(":dl2", tbRes->item(1,2)->text().toFloat());
-            qr.bindValue(":pr2", tbRes->item(0,3)->text().toInt());
+            qr.bindValue(":dh2", tbRes->item(1,0)->text().toFloat());
+            qr.bindValue(":dl2", tbRes->item(1,1)->text().toFloat());
+            qr.bindValue(":pr2", tbRes->item(1,2)->text().toInt());
 
             bool ok = qr.exec();
             if (!ok) {
@@ -176,12 +176,12 @@ void dtbase::querytbArhSl(int id, QTableWidget *tbRes, QLineSeries *pdSeris,Char
             qr.first();
 
             tbRes->item(0,0)->setText(QString::number(qr.value("dh1").toFloat(),'f',2));
-            tbRes->item(1,0)->setText(QString::number(qr.value("dl1").toFloat(),'f',2));
-            tbRes->item(0,1)->setText(QString::number(qr.value("pr1").toFloat(),'f',2));
+            tbRes->item(0,1)->setText(QString::number(qr.value("dl1").toFloat(),'f',2));
+            tbRes->item(0,2)->setText(QString::number(qr.value("pr1").toFloat(),'f',2));
 
-            tbRes->item(0,2)->setText(QString::number(qr.value("dh2").toFloat(),'f',2));
-            tbRes->item(1,2)->setText(QString::number(qr.value("dl2").toFloat(),'f',2));
-            tbRes->item(0,3)->setText(QString::number(qr.value("pr2").toFloat(),'f',2));
+            tbRes->item(1,0)->setText(QString::number(qr.value("dh2").toFloat(),'f',2));
+            tbRes->item(1,1)->setText(QString::number(qr.value("dl2").toFloat(),'f',2));
+            tbRes->item(1,2)->setText(QString::number(qr.value("pr2").toFloat(),'f',2));
         }
 
 

@@ -72,7 +72,7 @@ void trParam::comParamRW(bool write)
             "False",
             "False",
             "192.168.3.244",
-            "4041"
+            "4001"
         };
 
     for (int ii=0;ii < portPr.count();ii++)
