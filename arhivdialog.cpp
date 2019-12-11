@@ -31,6 +31,13 @@ arhivdialog::~arhivdialog()
     delete ui;
 }
 
+#define columnID 8 //column id = 8
+int arhivdialog::getcurID()
+{
+    int rw = ui->tbArhiv->currentRow();
+    return ui->tbArhiv->item(rw,columnID)->text().toInt();
+}
+
 void arhivdialog::frRefresh()
 {
     dtbs->querytbArhiv(ui->slDate->date(),ui->slPeriod->currentIndex(),ui->tbArhiv);
@@ -38,19 +45,16 @@ void arhivdialog::frRefresh()
 
 void arhivdialog::selectRow()
 {
-  int rw = ui->tbArhiv->currentRow();
-  int id = ui->tbArhiv->item(rw,7)->text().toInt();
   close();
-  emit tbSelect(id);
+  emit tbSelect(getcurID());
 }
 
 void arhivdialog::delMetering()
 {
     if(ui->tbArhiv->currentRow() >= 0)
     {
-        int rw = ui->tbArhiv->currentRow();
-        int id = ui->tbArhiv->item(rw,7)->text().toInt();
-        dtbs->deltbArhiv(id);
+        dtbs->deltbArhiv(getcurID());
         frRefresh();
     }
 }
+

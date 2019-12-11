@@ -77,89 +77,101 @@ void dtbase::querytbArhiv(QDate dt, int slPeriod, QTableWidget *tbArh)
                 tw = new QTableWidgetItem(qr.value("dttm").toDateTime().toString("dd.MM.yy hh:mm"));
                 tbArh->setItem(rw,0,tw);
 
-                tw = new QTableWidgetItem(QString::number(qr.value("dh1").toFloat(),'f',2));
+                tw = new QTableWidgetItem(QString::number(qr.value("pr3").toFloat(),'f',2));
                 tbArh->setItem(rw,1,tw);
-                tw = new QTableWidgetItem(QString::number(qr.value("dl1").toFloat(),'f',2));
+
+                tw = new QTableWidgetItem(QString::number(qr.value("dh1").toFloat(),'f',2));
                 tbArh->setItem(rw,2,tw);
-                tw = new QTableWidgetItem(QString::number(qr.value("pr1").toInt()));
+                tw = new QTableWidgetItem(QString::number(qr.value("dl1").toFloat(),'f',2));
                 tbArh->setItem(rw,3,tw);
+                tw = new QTableWidgetItem(QString::number(qr.value("pr1").toFloat(),'f',2));
+                tbArh->setItem(rw,4,tw);
 
                 tw = new QTableWidgetItem(QString::number(qr.value("dh2").toFloat(),'f',2));
-                tbArh->setItem(rw,4,tw);
-                tw = new QTableWidgetItem(QString::number(qr.value("dl2").toFloat(),'f',2));
                 tbArh->setItem(rw,5,tw);
-                tw = new QTableWidgetItem(QString::number(qr.value("pr2").toInt()));
+                tw = new QTableWidgetItem(QString::number(qr.value("dl2").toFloat(),'f',2));
                 tbArh->setItem(rw,6,tw);
+                tw = new QTableWidgetItem(QString::number(qr.value("pr2").toFloat(),'f',2));
+                tbArh->setItem(rw,7,tw);
 
                 tw = new QTableWidgetItem(QString::number(qr.value("id").toInt()));
-                tbArh->setItem(rw,7,tw);
+                tbArh->setItem(rw,8,tw);
 
                 rw++;
             }
-            tbArh->setColumnHidden(7,true);
+            tbArh->setColumnHidden(8,true);
         }
     }
 }
 
-void dtbase::pushtbArhiv(QTableWidget *tbRes, QLineSeries *pdSeris,QProgressBar *pbar)
+
+void PushThread::run()
+{
+    QSqlQuery qr = QSqlQuery(*db);
+
+    if(qr.exec("SELECT MAX(id) as id FROM tbArhiv"))
+    {
+        qr.first();
+        int idx = qr.value("id").toInt();
+        idx +=1;
+
+        qr.prepare("INSERT INTO tbArhiv (id,dttm,dh1,dl1,pr1,dh2,dl2,pr2,pr3) "
+                    "VALUES (:id,:dttm,:dh1,:dl1,:pr1,:dh2,:dl2,:pr2,:pr3)");
+
+        qr.bindValue(":id", idx);
+        qr.bindValue(":dttm", QDateTime::currentDateTime());
+
+        qr.bindValue(":dh1", tbRes->item(0,0)->text().toFloat());
+        qr.bindValue(":dl1", tbRes->item(0,1)->text().toFloat());
+        qr.bindValue(":pr1", tbRes->item(0,2)->text().toFloat());
+
+        qr.bindValue(":dh2", tbRes->item(1,0)->text().toFloat());
+        qr.bindValue(":dl2", tbRes->item(1,1)->text().toFloat());
+        qr.bindValue(":pr2", tbRes->item(1,2)->text().toFloat());
+
+        qr.bindValue(":pr3", tbRes->item(2,2)->text().toFloat());
+
+        bool ok = qr.exec();
+        if (!ok)
+        {
+            QString sErr = qr.lastError().text();
+            qCritical("tbArhiv Error: %s", qUtf8Printable(sErr));
+        }
+
+        int cnt = pdSeris->count();
+        qreal xx = -1.1;
+        for (int ii=0;ii<cnt;ii++)
+        {
+            if (pdSeris->at(ii).x() > xx + 1)
+            {
+                qr.prepare("INSERT INTO tbGraph (id,X,Y) VALUES (:id,:X,:Y)");
+                qr.bindValue(":id",idx);
+                qr.bindValue(":X",pdSeris->at(ii).x());
+                qr.bindValue(":Y",pdSeris->at(ii).y());
+
+                bool ok = qr.exec();
+                if (!ok)
+                {
+                    QString sErr = qr.lastError().text();
+                    qCritical("tbGraph Error: %s", qUtf8Printable(sErr));
+                }
+                xx = pdSeris->at(ii).x();
+            }
+        }
+        db->commit();
+    }
+}
+
+void dtbase::pushtbArhiv(QTableWidget *tbRes, QLineSeries *pdSeris)
 {
     if(databaseConnect(&db))
     {
-        QSqlQuery qr = QSqlQuery(db);
-
-//        qr.prepare("SELECT MAX(id) as id FROM tbArhiv");
-        if(qr.exec("SELECT MAX(id) as id FROM tbArhiv"))
-        {
-            qr.first();
-            int idx = qr.value("id").toInt();
-            idx +=1;
-
-            qr.prepare("INSERT INTO tbArhiv (id,dttm,dh1,dl1,pr1,dh2,dl2,pr2) "
-                        "VALUES (:id,:dttm,:dh1,:dl1,:pr1,:dh2,:dl2,:pr2)");
-
-            qr.bindValue(":id", idx);
-            qr.bindValue(":dttm", QDateTime::currentDateTime());
-
-            qr.bindValue(":dh1", tbRes->item(0,0)->text().toFloat());
-            qr.bindValue(":dl1", tbRes->item(0,1)->text().toFloat());
-            qr.bindValue(":pr1", tbRes->item(0,2)->text().toInt());
-
-            qr.bindValue(":dh2", tbRes->item(1,0)->text().toFloat());
-            qr.bindValue(":dl2", tbRes->item(1,1)->text().toFloat());
-            qr.bindValue(":pr2", tbRes->item(1,2)->text().toInt());
-
-            bool ok = qr.exec();
-            if (!ok) {
-                QString sErr = qr.lastError().text();
-                qCritical("tbArhiv Error: %s", qUtf8Printable(sErr));
-            }
-
-            int cnt = pdSeris->count();
-            qreal xx = -1.1;
-            for (int ii=0;ii<cnt;ii++)
-            {
-               if (pdSeris->at(ii).x() > xx + 1)
-               {
-                   int pb = ii * 100 / cnt;
-                   pbar->setValue(pb);
-
-                   qr.prepare("INSERT INTO tbGraph (id,X,Y) VALUES (:id,:X,:Y)");
-                   qr.bindValue(":id",idx);
-                   qr.bindValue(":X",pdSeris->at(ii).x());
-                   qr.bindValue(":Y",pdSeris->at(ii).y());
-
-                   bool ok = qr.exec();
-                   if (!ok) {
-                     QString sErr = qr.lastError().text();
-                     qCritical("tbGraph Error: %s", qUtf8Printable(sErr));
-                   }
-                   xx = pdSeris->at(ii).x();
-               }
-            }
-            pbar->setValue(100);
-        }
-
-        db.commit();
+        PushThread *pushThread = new PushThread;
+        connect(pushThread, &PushThread::finished, pushThread, &QObject::deleteLater);
+        pushThread->db = &db;
+        pushThread->tbRes = tbRes;
+        pushThread->pdSeris = pdSeris;
+        pushThread->start();
     }
 }
 
@@ -182,6 +194,9 @@ void dtbase::querytbArhSl(int id, QTableWidget *tbRes, QLineSeries *pdSeris,Char
             tbRes->item(1,0)->setText(QString::number(qr.value("dh2").toFloat(),'f',2));
             tbRes->item(1,1)->setText(QString::number(qr.value("dl2").toFloat(),'f',2));
             tbRes->item(1,2)->setText(QString::number(qr.value("pr2").toFloat(),'f',2));
+
+            tbRes->item(2,2)->setText(QString::number(qr.value("pr3").toFloat(),'f',2));
+
         }
 
 

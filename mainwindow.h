@@ -98,7 +98,7 @@ private:
     void showStatusMessage(const QString &message);
     void refreshDisplay(QMap<QString,QString> SerialZn);
     void clearLabel();
-    QString createHtml(QTableWidget* tbrs, QLineSeries* pdsr);
+//    QString createHtml(QTableWidget* tbrs, QLineSeries* pdsr);
 
 private:
     Ui::MainWindow *ui;

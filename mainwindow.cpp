@@ -416,7 +416,7 @@ void MainWindow::refreshDisplay(QMap<QString, QString> SerialZn)
     {
         meteringOn = false;
         ui->lbMetering->setEnabled(false);
-        dtbs->pushtbArhiv(ui->tableResult,pdSeris,ui->progressBar);
+        dtbs->pushtbArhiv(ui->tableResult,pdSeris);
     }
 
     if(SerialZn.value("Water") == "On")
@@ -434,8 +434,8 @@ void MainWindow::refreshDisplay(QMap<QString, QString> SerialZn)
     if(meteringOn)
     {
         if(SerialZn.value("View") == "On") iniSeries();
-        if(SerialZn.value("ps") != "")
-          if(SerialZn.value("ps").toInt() > 0) appSeries(SerialZn);
+        if(SerialZn.value("gs") != "")
+          if(SerialZn.value("gs").toInt() >= 0) appSeries(SerialZn);
     }
 
     if(SerialZn.value("Err") != "")
@@ -516,7 +516,7 @@ void MainWindow::iniSeries()
 void MainWindow::appSeries(QMap<QString,QString> zn)
 {
         float addX = QString(zn.value("tm")).toFloat() / 1000;
-        float addY = QString(zn.value("dp")).toFloat();
+        float addY = QString(zn.value("dn")).toFloat();
 
         if (addX > maxTm && addY > 0) {
           maxTm = addX;
@@ -607,6 +607,7 @@ void MainWindow::saveTable()
     saveThread->start();
 }
 
+/*
 QString MainWindow::createHtml(QTableWidget* tbrs, QLineSeries* pdsr)
 {
 
@@ -644,15 +645,15 @@ QString MainWindow::createHtml(QTableWidget* tbrs, QLineSeries* pdsr)
     }
 
     html += "</table></body></html>";
-/*
-    QFile file(fileName);
-    file.open(QIODevice::WriteOnly | QIODevice::Text);
-    file.write(createHtml(ui->tableResult,pdSeris).toUtf8());
-    file.close();
-*/
+
+//    QFile file(fileName);
+//    file.open(QIODevice::WriteOnly | QIODevice::Text);
+//    file.write(createHtml(ui->tableResult,pdSeris).toUtf8());
+//    file.close();
+
     return html;
 }
-
+*/
 
 void MainWindow::changeEvent(QEvent *event)
 {

@@ -91,6 +91,12 @@
      </column>
      <column>
       <property name="text">
+       <string>Итог
+%</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
        <string>Пульпа
 Пл.Нач.</string>
       </property>

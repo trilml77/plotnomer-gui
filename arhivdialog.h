@@ -30,6 +30,7 @@ private:
 
 private:
     dtbase *dtbs;
+    int getcurID();
 
 };
 

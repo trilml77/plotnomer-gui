@@ -248,7 +248,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Плотность кг</string>
+           <string>Плотность тон/м3</string>
           </property>
          </widget>
         </item>
