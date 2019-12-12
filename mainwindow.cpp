@@ -203,6 +203,8 @@ void MainWindow::about()
 
 void MainWindow::writeData(const QByteArray &data)
 {
+    if(!prbConnected()) return;
+
     SettingsDialog::Settings p = settings->settings();
     if(!p.nportConnection)
     {
@@ -256,7 +258,7 @@ void MainWindow::readData()
 
 void MainWindow::tmSerialRun()
 {
-    if(serial->isOpen())
+    if(prbConnected())
     {
         qint64 nn = serialRead.secsTo(QDateTime::currentDateTime());
         if(nn > 5) writeData(QByteArray("v1\r"));
