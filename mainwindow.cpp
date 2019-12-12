@@ -279,9 +279,23 @@ void MainWindow::timerSet()
     meteringTimer = QDateTime::currentDateTime();
 }
 
+bool MainWindow::prbConnected()
+{
+    SettingsDialog::Settings p = settings->settings();
+    if(!p.nportConnection)
+    {
+        return serial->isOpen();
+    }
+    else
+    {
+        return tcpsok->isOpen();
+    }
+
+}
+
 void MainWindow::snWork()
 {
-    if(serial->isOpen() && !meteringOn)
+    if(prbConnected() && !meteringOn)
     {
         QByteArray ba = QByteArray("mt\r");
         writeData(ba);
@@ -292,7 +306,7 @@ void MainWindow::snWork()
 
 void MainWindow::snWahing()
 {
-    if(serial->isOpen() && !wahingOn)
+    if(prbConnected() && !wahingOn)
     {
         QByteArray ba = QByteArray("cl\r");
         writeData(ba);
@@ -303,7 +317,7 @@ void MainWindow::snWahing()
 
 void MainWindow::snAbort()
 {
-    if(serial->isOpen())
+    if(prbConnected())
     {
         QByteArray ba = QByteArray("ab\r");
         writeData(ba);
@@ -510,6 +524,13 @@ void MainWindow::iniSeries()
     maxTm = 0;
     chrt->axisY()->setRange(0,maxPd);
     chrt->axisX()->setRange(0,maxTm);
+
+    for(int rw=0;rw < ui->tableResult->rowCount();rw++)
+    {
+        for(int cl=0;cl < ui->tableResult->columnCount();cl++)
+            if(ui->tableResult->item(rw,cl))
+                ui->tableResult->item(rw,cl)->setText("");
+    }
 }
 
 
