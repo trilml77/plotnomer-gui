@@ -99,7 +99,6 @@ private:
     void refreshDisplay(QMap<QString,QString> SerialZn);
     void clearLabel();
     bool prbConnected();
-//    QString createHtml(QTableWidget* tbrs, QLineSeries* pdsr);
 
 private:
     Ui::MainWindow *ui;

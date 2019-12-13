@@ -502,6 +502,7 @@ void MainWindow::setChart(QChart *ch)
 {
     ch->legend()->hide();
     ch->addSeries(pdSeris);
+    ch->setTitle("");
 
     QValueAxis *axisY = new QValueAxis;
     axisY->setLabelFormat("%.1f");
@@ -527,6 +528,7 @@ void MainWindow::iniSeries()
     maxTm = 0;
     chrt->axisY()->setRange(0,maxPd);
     chrt->axisX()->setRange(0,maxTm);
+    chrt->setTitle("");
 
     for(int rw=0;rw < ui->tableResult->rowCount();rw++)
     {
@@ -569,6 +571,7 @@ void MainWindow::historySelect(int id)
    dtbs->querytbArhSl(id,ui->tableResult,pdSeris,&mx,ui->progressBar);
    chrt->axisY()->setRange(mx.minY,mx.maxY);
    chrt->axisX()->setRange(mx.minX,mx.maxX);
+   chrt->setTitle(mx.title);
    chrt->update();
    chartView->update();
 }
@@ -618,9 +621,12 @@ void SaveThread::run()
 
 void MainWindow::saveTable()
 {
+    QRegExp rs("[^0-9]");
+    QString fldt = "plotnomer-" + chrt->title().replace(rs,"") + ".xls";
+
     QString fileName = QFileDialog::getSaveFileName(this,
-                          tr("Save table"), "plotnomer.xls",
-                          tr("plotnomer.xls (*.xls);;All Files (*)"));
+                          tr("Save table"), fldt,
+                          tr("plotnomer-*.xls (*.xls);;All Files (*)"));
     if (fileName.isEmpty()) return;
 
     SaveThread *saveThread = new SaveThread;
@@ -630,54 +636,6 @@ void MainWindow::saveTable()
     saveThread->pdsr = pdSeris;
     saveThread->start();
 }
-
-/*
-QString MainWindow::createHtml(QTableWidget* tbrs, QLineSeries* pdsr)
-{
-
-    QString html  = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"><html>";
-    html +="<head>";
-    html +="<meta charset=\"UTF-8\">";
-    html +="</head>";
-    html +="<body>";
-
-    html += "<table border=\"3\" cellspacing=\"0\" cellpadding=\"0\">";
-
-    for(int ii=0;ii<tbrs->rowCount();ii++)
-    {
-        html +="<tr>";
-        for(int nn=0;nn<tbrs->columnCount();nn++)
-            html +="<td>" + tbrs->item(ii,nn)->text() + "</td>";
-        html +="</tr>";
-    }
-
-    html +="</table>";
-
-
-    html += "<table border=\"3\" cellspacing=\"0\" cellpadding=\"0\">";
-    html += "<tr>";
-    html += "<th align=\"center\" valign=\"center\">X </th>";
-    html += "<th align=\"center\" valign=\"center\">Y </th>";
-    html += "</tr>";
-
-    for(int ii=0;ii<pdsr->count();ii++)
-    {
-        html +="<tr>";
-        html +="<td>" + QString::number(pdsr->at(ii).x(),'g',3) + "</td>";
-        html +="<td>" + QString::number(pdsr->at(ii).y(),'g',3) + "</td>";
-        html +="</tr>";
-    }
-
-    html += "</table></body></html>";
-
-//    QFile file(fileName);
-//    file.open(QIODevice::WriteOnly | QIODevice::Text);
-//    file.write(createHtml(ui->tableResult,pdSeris).toUtf8());
-//    file.close();
-
-    return html;
-}
-*/
 
 void MainWindow::changeEvent(QEvent *event)
 {

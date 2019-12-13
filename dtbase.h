@@ -16,6 +16,7 @@ struct ChartMinMax
     qreal minX;
     qreal maxY;
     qreal minY;
+    QString title;
 };
 
 class dtbase : public QObject

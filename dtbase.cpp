@@ -196,6 +196,7 @@ void dtbase::querytbArhSl(int id, QTableWidget *tbRes, QLineSeries *pdSeris,Char
             tbRes->item(1,2)->setText(QString::number(qr.value("pr2").toFloat(),'f',2));
 
             tbRes->item(2,2)->setText(QString::number(qr.value("pr3").toFloat(),'f',2));
+            mx->title = qr.value("dttm").toDateTime().toString("dd.MM.yy hh:mm");
 
         }
 
