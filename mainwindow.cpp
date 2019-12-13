@@ -83,6 +83,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     connect(&tmSerial,  SIGNAL(timeout()), this, SLOT(tmSerialRun()));
+    serialRead = QDateTime::currentDateTime();
     tmSerial.setInterval(1000);
     tmSerial.start();
 
