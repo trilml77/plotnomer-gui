@@ -6,6 +6,7 @@
 
 #include <QApplication>
 #include <QTextStream>
+#include <QStyleFactory>
 
 #include "mainwindow.h"
 #include "trparam.h"
@@ -20,6 +21,7 @@ int main(int argc, char *argv[])
 //    app.setOrganizationName("enplterm");
 //    app.setApplicationName("enplterm");
     app.setDesktopSettingsAware(false);
+    app.setStyle(QStyleFactory::create("Fusion"));
 
     trPrm.initialize(app.applicationDirPath());
     logPath = app.applicationDirPath();
