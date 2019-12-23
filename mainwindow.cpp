@@ -421,7 +421,10 @@ void MainWindow::clearLabel()
 void MainWindow::refreshDisplay(QMap<QString, QString> SerialZn)
 {
     if(SerialZn.value("Cntrl") == "On")
+    {
+        clearLabel();
         writeData(QByteArray("v1\r"));
+    }
 
     if(SerialZn.value("Metr") == "On")
     {

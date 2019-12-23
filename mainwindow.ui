@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Simple Terminal</string>
+   <string>Plotnomer</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="terminal.qrc">
+    <normaloff>:/images/mettering1.png</normaloff>:/images/mettering1.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -342,7 +346,7 @@
      <x>0</x>
      <y>0</y>
      <width>947</width>
-     <height>23</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuCalls">
