@@ -158,7 +158,7 @@ void MainWindow::openSerialPort()
         ui->actionConfigure->setEnabled(false);
 
     } else {
-        QMessageBox::critical(this, tr("Error"), serial->errorString());
+        QMessageBox::critical(this, tr("Error"), serial->errorString(),QMessageBox::Ok);
         showStatusMessage(tr("Open error"));
     }
 }
@@ -184,7 +184,7 @@ void MainWindow::openSocket()
         }
         else
         {
-            QMessageBox::critical(this, tr("Error"), tcpsok->errorString());
+            QMessageBox::critical(this, tr("Error"), tcpsok->errorString(),QMessageBox::Ok);
             showStatusMessage(tr("Connect error"));
         }
     }
@@ -349,17 +349,17 @@ void MainWindow::onSokDisplayError(QAbstractSocket::SocketError socketError)
     switch(socketError)
     {
     case QAbstractSocket::HostNotFoundError:
-        QMessageBox::critical(this,"Connection : The host was not found. %s",qUtf8Printable(hostport)); break;
+        QMessageBox::critical(this,"Connection : The host was not found. %s",qUtf8Printable(hostport),QMessageBox::Ok); break;
     case QAbstractSocket::RemoteHostClosedError:
-        QMessageBox::warning(this,"Connection : The remote host is closed. %s",qUtf8Printable(hostport)); break;
+        QMessageBox::warning(this,"Connection : The remote host is closed. %s",qUtf8Printable(hostport),QMessageBox::Ok); break;
     case QAbstractSocket::ConnectionRefusedError:
-        QMessageBox::warning(this,"Connection : The connection was refused. %s",qUtf8Printable(hostport)); break;
+        QMessageBox::warning(this,"Connection : The connection was refused. %s",qUtf8Printable(hostport),QMessageBox::Ok); break;
     case QAbstractSocket::SocketTimeoutError:
-        QMessageBox::warning(this,"Connection : The connection timeout. %s",qUtf8Printable(hostport));
+        QMessageBox::warning(this,"Connection : The connection timeout. %s",qUtf8Printable(hostport),QMessageBox::Ok);
         tcpsok->close();
         break;
     default:
-        QMessageBox::critical(this,"Connection : %s",qUtf8Printable(QString(tcpsok->errorString())+" : "+hostport)); break;
+        QMessageBox::critical(this,"Connection : %s",qUtf8Printable(QString(tcpsok->errorString())+" : "+hostport),QMessageBox::Ok); break;
     }
 }
 
@@ -367,7 +367,7 @@ void MainWindow::onSokDisplayError(QAbstractSocket::SocketError socketError)
 void MainWindow::handleError(QSerialPort::SerialPortError error)
 {
     if (error == QSerialPort::ResourceError) {
-        QMessageBox::critical(this, tr("Critical Error"), serial->errorString());
+        QMessageBox::critical(this, tr("Critical Error"), serial->errorString(),QMessageBox::Ok);
         closeSerialPort();
     }
 }
